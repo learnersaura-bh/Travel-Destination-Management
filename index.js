@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 const User = require("./models/user.model");
 const destinationRouter = require("./routes/destination.route");
-
+const userRouter = require('./routes/user.route')
 initialiseDatabase();
 
 app.use(express.json());
@@ -13,6 +13,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/destinations", destinationRouter);
+app.use('/users', userRouter)
 
 const PORT = process.env.PORT || 3000;
 

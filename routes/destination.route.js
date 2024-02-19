@@ -141,25 +141,19 @@ destinationRouter.post("/:destinationId", async (req, res) => {
   }
 });
 
-destinationRouter.post("/:destinationId/reviews", async (req, res) => {
+destinationRouter.post('/:destinationId/reviews', async (req, res) => {
   try {
-    const destinationId = req.params.destinationId;
-    const reviewData = req.body;
-
-    const updatedDestination = await addReviewToDestination(
-      destinationId,
-      reviewData,
-    );
-
-    res.status(201).json({
-      message: "Review added successfully",
-      destination: updatedDestination,
-    });
+    const { userId, reviewText } = req.body;
+    const updatedDestination = await addReviewToDestination(req.params.destinationId, userId, reviewText);
+    if (updatedDestination) {
+      res.status(201).json({ message: 'Review added successfully to destination', updatedDestination })
+    } else {
+      res.status(404).json({ error: 'Destination or user not found' })
+    }
   } catch (error) {
-    console.error("Error adding review:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: 'Failed to add review to destination' })
   }
-});
+})
 
 destinationRouter.get("/:name", async (req, res) => {
   try {

@@ -162,29 +162,31 @@ async function filterDestinationsByRating(minimumRating) {
 // Update the Travel Destination Model to include a reviews field:
 // Create a function to add a review to a travel destination:
 
-async function addReviewToDestination(destinationId, { reviewData }) {
+async function addReviewToDestination(destinationId, userId, reviewText){
   try {
-    const destination = await Destination.findById(destinationId);
-
-    if (!destination) {
-      console.log("No travel destination found with the provided ID.");
-      return null;
+    const destinationToUpdate = await Destination.findById(destinationId)
+    if (destinationToUpdate) {
+      const { reviews } = destinationToUpdate;
+      const review = {
+        user: userId,
+        text: reviewText 
+      }
+      reviews.push(review);
+      await destinationToUpdate.save();
+      const updatedDestination = await Destination.findById(destinationId).populate({
+        path: 'reviews',
+        populate: {
+          path: 'user',
+          select: 'profilePictureUrl username'
+        }
+      })
+      console.log('Added review for the destination:', updatedDestination)
+      return updatedDestination
+    } else {
+      console.log('Travel destination not found')
     }
-
-    const newReview = reviewData;
-
-    destination.reviews.push(newReview);
-
-    // const newRating = (destination.rating * (destination.reviews.length - 1) + newReview.rating) / destination.reviews.length;
-    // destination.rating = newRating;
-
-    const updatedDestination = await destination.save();
-
-    console.log("Review added to travel destination:", updatedDestination);
-    return updatedDestination;
   } catch (error) {
-    console.error("Error adding review to travel destination:", error.message);
-    throw error;
+    console.log('Error adding review:', error)
   }
 }
 
